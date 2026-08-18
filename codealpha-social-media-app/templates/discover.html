@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}Discover Community - SocialPulse{% endblock %}
+
+{% block content %}
+<h1 style="font-size:1.6rem;margin-bottom:8px;">Discover Creators & Members</h1>
+<p style="color:var(--text-muted);margin-bottom:28px;">Connect with people to personalize your daily feed.</p>
+
+{% if users %}
+  <div class="users-grid">
+    {% for u in users %}
+      <div class="card user-card">
+        <img src="{{ u.profile.avatar_url }}" class="avatar-lg" style="margin-bottom:14px;" alt="{{ u.username }}">
+        <a href="{% url 'user_profile' u.username %}" class="post-author" style="font-size:1.1rem;">{{ u.username }}</a>
+        <p style="color:var(--text-muted);font-size:0.82rem;margin:4px 0 10px;">📍 {{ u.profile.location }}</p>
+        <p style="color:#cbd5e1;font-size:0.88rem;margin-bottom:16px;line-clamp:2;-webkit-line-clamp:2;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;height:2.6em;">
+          {{ u.profile.bio }}
+        </p>
+
+        <button id="discover-follow-btn-{{ u.id }}"
+                onclick="toggleFollow({{ u.id }}, 'discover-follow-btn-{{ u.id }}')"
+                class="btn {% if u.id in following_ids %}btn-secondary{% else %}btn-primary{% endif %} btn-sm btn-block">
+          {% if u.id in following_ids %}Following ✔️{% else %}Follow +{% endif %}
+        </button>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="card" style="text-align:center;padding:48px;">
+    <h3>No other users found yet!</h3>
+    <p style="color:var(--text-muted);margin-top:8px;">Register another user account in a new tab to test community interactions.</p>
+  </div>
+{% endif %}
+{% endblock %}

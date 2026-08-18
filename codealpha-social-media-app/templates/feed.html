@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Feed - SocialPulse{% endblock %}
+
+{% block content %}
+<!-- Create Post Section -->
+<div class="card create-post-card">
+  <h2 style="font-size:1.15rem;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+    <span>✨</span> Share an update with the community
+  </h2>
+  <form onsubmit="createPost(event)">
+    <textarea id="create-post-content" class="create-post-textarea" placeholder="What's happening? Share your thoughts, ideas, or questions..." required></textarea>
+    <div style="display:flex;justify-content:flex-end;">
+      <button type="submit" class="btn btn-primary">Publish Post 🚀</button>
+    </div>
+  </form>
+</div>
+
+<!-- Social Posts Feed -->
+<h2 style="font-size:1.4rem;margin-bottom:20px;letter-spacing:-0.02em;">Recent Posts</h2>
+
+{% if posts %}
+  {% for post in posts %}
+    <div class="card" id="post-card-{{ post.id }}">
+      <div class="post-header">
+        <img src="{{ post.author.profile.avatar_url }}" class="avatar-sm" alt="{{ post.author.username }}">
+        <div>
+          <a href="{% url 'user_profile' post.author.username %}" class="post-author">{{ post.author.username }}</a>
+          <div class="post-time">{{ post.created_at|date:"M d, Y • h:i A" }}</div>
+        </div>
+      </div>
+
+      <div class="post-content">{{ post.content }}</div>
+
+      <div class="post-footer">
+        <button id="like-btn-{{ post.id }}" 
+                onclick="toggleLike({{ post.id }})" 
+                class="btn btn-pink btn-sm {% if post.id in user_liked_ids %}active{% endif %}">
+          <span class="heart-icon">{% if post.id in user_liked_ids %}❤️{% else %}🤍{% endif %}</span>
+          <span id="like-count-{{ post.id }}">{{ post.total_likes }}</span>
+        </button>
+
+        <button onclick="toggleComments({{ post.id }})" class="btn btn-secondary btn-sm">
+          💬 Comments (<span id="comment-count-{{ post.id }}">{{ post.comments.count }}</span>)
+        </button>
+      </div>
+
+      <!-- Collapsible Comments Section -->
+      <div class="comments-section" id="comments-section-{{ post.id }}" style="display:none;">
+        <div id="comments-list-{{ post.id }}">
+          {% for comment in post.comments.all %}
+            <div class="comment-item">
+              <img src="{{ comment.author.profile.avatar_url }}" class="avatar-xs" alt="{{ comment.author.username }}">
+              <div>
+                <a href="{% url 'user_profile' comment.author.username %}" class="comment-author">{{ comment.author.username }}</a>
+                <span style="font-size:0.75rem;color:var(--text-muted);margin-left:6px;">{{ comment.created_at|date:"M d, h:i A" }}</span>
+                <div class="comment-text">{{ comment.content }}</div>
+              </div>
+            </div>
+          {% empty %}
+            <p style="color:var(--text-muted);font-size:0.88rem;margin-bottom:10px;">No comments yet. Be the first to reply!</p>
+          {% endfor %}
+        </div>
+
+        <!-- Add Comment Form -->
+        <form onsubmit="submitComment(event, {{ post.id }})" class="comment-input-group">
+          <input type="text" id="comment-input-{{ post.id }}" class="form-control" style="margin-bottom:0;" placeholder="Write a comment..." required>
+          <button type="submit" class="btn btn-primary btn-sm">Send</button>
+        </form>
+      </div>
+    </div>
+  {% endfor %}
+{% else %}
+  <div class="card" style="text-align:center;padding:48px 20px;">
+    <h3>No posts in the feed yet!</h3>
+    <p style="color:var(--text-muted);margin-top:8px;">Be the first person to publish a post using the form above.</p>
+  </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ profile_user.username }}'s Profile - SocialPulse{% endblock %}
+
+{% block content %}
+<!-- Profile Banner Header -->
+<div class="profile-banner">
+  <div class="profile-main-info">
+    <img src="{{ profile_user.profile.avatar_url }}" class="avatar-lg" alt="{{ profile_user.username }}">
+    <div>
+      <h1 style="font-size:1.8rem;line-height:1.2;">{{ profile_user.username }}</h1>
+      <p style="color:var(--text-muted);font-size:0.9rem;margin-top:4px;">📍 {{ profile_user.profile.location }}</p>
+      <p style="color:#cbd5e1;font-size:0.95rem;margin-top:10px;">{{ profile_user.profile.bio }}</p>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:16px;">
+    <div class="profile-stats">
+      <div class="stat-item">
+        <div class="stat-val">{{ posts.count }}</div>
+        <div class="stat-lbl">Posts</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val" id="followers-count">{{ followers_count }}</div>
+        <div class="stat-lbl">Followers</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val">{{ following_count }}</div>
+        <div class="stat-lbl">Following</div>
+      </div>
+    </div>
+
+    {% if user == profile_user %}
+      <a href="{% url 'edit_profile' %}" class="btn btn-secondary btn-sm">⚙️ Edit Profile</a>
+    {% else %}
+      <button id="follow-btn-{{ profile_user.id }}" 
+              onclick="toggleFollow({{ profile_user.id }}, 'follow-btn-{{ profile_user.id }}')" 
+              class="btn {% if is_following %}btn-secondary{% else %}btn-primary{% endif %} btn-sm">
+        {% if is_following %}Following ✔️{% else %}Follow +{% endif %}
+      </button>
+    {% endif %}
+  </div>
+</div>
+
+<!-- User's Posts -->
+<h2 style="font-size:1.4rem;margin-bottom:20px;">Posts by {{ profile_user.username }}</h2>
+
+{% if posts %}
+  {% for post in posts %}
+    <div class="card">
+      <div class="post-header">
+        <img src="{{ post.author.profile.avatar_url }}" class="avatar-sm" alt="{{ post.author.username }}">
+        <div>
+          <span class="post-author">{{ post.author.username }}</span>
+          <div class="post-time">{{ post.created_at|date:"M d, Y • h:i A" }}</div>
+        </div>
+      </div>
+      <div class="post-content">{{ post.content }}</div>
+      <div class="post-footer">
+        <button id="like-btn-{{ post.id }}" onclick="toggleLike({{ post.id }})" class="btn btn-pink btn-sm {% if post.id in user_liked_ids %}active{% endif %}">
+          <span class="heart-icon">{% if post.id in user_liked_ids %}❤️{% else %}🤍{% endif %}</span>
+          <span id="like-count-{{ post.id }}">{{ post.total_likes }}</span>
+        </button>
+        <button onclick="toggleComments({{ post.id }})" class="btn btn-secondary btn-sm">
+          💬 Comments ({{ post.comments.count }})
+        </button>
+      </div>
+    </div>
+  {% endfor %}
+{% else %}
+  <div class="card" style="text-align:center;padding:40px;">
+    <p style="color:var(--text-muted)">No posts shared yet by {{ profile_user.username }}.</p>
+  </div>
+{% endif %}
+{% endblock %}
