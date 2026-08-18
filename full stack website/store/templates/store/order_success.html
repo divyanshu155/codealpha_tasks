@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Order Confirmed - CyberStore{% endblock %}
+
+{% block content %}
+<div class="container">
+  
+  <div class="glass" style="max-width: 680px; margin: 2rem auto; padding: 3rem 2.5rem; border-radius: var(--radius-lg); text-align: center;">
+    <div style="width: 72px; height: 72px; background: linear-gradient(135deg, var(--accent-emerald), var(--accent-cyan)); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; box-shadow: 0 0 30px rgba(16, 185, 129, 0.4);">
+      <i class="bi bi-check-lg" style="font-size: 2.5rem; color: #fff;"></i>
+    </div>
+
+    <h1 style="font-family: var(--font-heading); font-size: 2.2rem; margin-bottom: 0.5rem;">Order Confirmed!</h1>
+    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+      Thank you for your purchase. We have received your order and are preparing it for shipment.
+    </p>
+
+    <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 2rem; text-align: left;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem; font-size: 0.95rem;">
+        <span style="color: var(--text-muted);">Order Number:</span>
+        <strong style="color: var(--accent-cyan);">{{ order.order_number }}</strong>
+      </div>
+      <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem; font-size: 0.95rem;">
+        <span style="color: var(--text-muted);">Customer:</span>
+        <span>{{ order.full_name }} ({{ order.email }})</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem; font-size: 0.95rem;">
+        <span style="color: var(--text-muted);">Shipping Address:</span>
+        <span>{{ order.address }}, {{ order.city }} {{ order.postal_code }}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; font-size: 0.95rem;">
+        <span style="color: var(--text-muted);">Total Paid:</span>
+        <strong style="font-size: 1.1rem; color: var(--text-main);">${{ order.total_amount }}</strong>
+      </div>
+    </div>
+
+    <!-- Order Items List -->
+    <div style="text-align: left; margin-bottom: 2rem;">
+      <h3 style="font-size: 1.05rem; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.4rem;">Purchased Items</h3>
+      {% for item in order.items.all %}
+        <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px dashed var(--border-color); font-size: 0.9rem;">
+          <span>{{ item.quantity }}x {{ item.product_name }}</span>
+          <span style="font-weight: 600;">${{ item.get_cost }}</span>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div style="display: flex; gap: 1rem; justify-content: center;">
+      <a href="{% url 'product_list' %}" class="btn btn-primary">Continue Shopping</a>
+      <button onclick="window.print()" class="btn btn-secondary"><i class="bi bi-printer"></i> Print Receipt</button>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

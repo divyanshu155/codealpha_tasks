@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Shopping Cart - CyberStore{% endblock %}
+
+{% block content %}
+<div class="container">
+  
+  <h1 style="font-family: var(--font-heading); font-size: 2rem; margin-bottom: 2rem;">Shopping Cart</h1>
+
+  {% if cart_items %}
+    <div class="cart-layout">
+      <!-- Items List -->
+      <div class="cart-table-card glass">
+        <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color); margin-bottom: 0.5rem;">
+          <span style="font-weight: 600;">Item Details</span>
+          <form action="{% url 'cart_clear' %}" method="POST" style="margin: 0;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">
+              <i class="bi bi-trash"></i> Clear Cart
+            </button>
+          </form>
+        </div>
+
+        {% for item in cart_items %}
+          <div class="cart-item-row">
+            <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}" class="cart-item-img">
+            <div>
+              <div class="cart-item-title">{{ item.product.name }}</div>
+              <div style="font-size: 0.82rem; color: var(--text-muted);">Unit price: ${{ item.product.price }}</div>
+            </div>
+
+            <!-- Quantity Update Form -->
+            <form action="{% url 'cart_update' item.product.id %}" method="POST" style="display: flex; align-items: center;">
+              {% csrf_token %}
+              <div class="qty-picker" style="border-radius: var(--radius-sm);">
+                <button type="submit" name="quantity" value="{{ item.quantity|add:'-1' }}" class="qty-btn">-</button>
+                <input type="text" readonly value="{{ item.quantity }}" class="qty-input">
+                <button type="submit" name="quantity" value="{{ item.quantity|add:'1' }}" class="qty-btn">+</button>
+              </div>
+            </form>
+
+            <div class="cart-item-price">${{ item.total_price }}</div>
+
+            <!-- Remove Button -->
+            <form action="{% url 'cart_remove' item.product.id %}" method="POST">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-outline" style="padding: 0.4rem 0.6rem; border-color: rgba(255,255,255,0.1); color: var(--text-subtle);">
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </form>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Order Summary Card -->
+      <div class="summary-card glass">
+        <h2 class="summary-title">Order Summary</h2>
+
+        <div class="summary-line">
+          <span>Subtotal</span>
+          <span>${{ cart_subtotal }}</span>
+        </div>
+
+        <div class="summary-line">
+          <span>Estimated Tax (8%)</span>
+          <span>${{ cart_tax|floatformat:2 }}</span>
+        </div>
+
+        <div class="summary-line">
+          <span>Shipping</span>
+          <span>{% if cart_shipping == 0 %}<span style="color: var(--accent-emerald);">FREE</span>{% else %}${{ cart_shipping }}{% endif %}</span>
+        </div>
+
+        {% if cart_shipping > 0 %}
+          <div style="font-size: 0.78rem; color: var(--accent-cyan); margin-bottom: 1rem;">
+            Add ${{ 50|add:cart_subtotal|stringformat:".2f" }} more for Free Shipping!
+          </div>
+        {% endif %}
+
+        <div class="summary-line total">
+          <span>Total</span>
+          <span style="color: var(--accent-cyan);">${{ cart_total|floatformat:2 }}</span>
+        </div>
+
+        <a href="{% url 'checkout' %}" class="btn btn-primary" style="width: 100%; padding: 0.9rem; margin-top: 1.5rem; font-size: 1rem;">
+          Proceed to Checkout <i class="bi bi-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  {% else %}
+    <div class="glass" style="text-align: center; padding: 4rem 2rem; border-radius: var(--radius-lg); max-width: 600px; margin: 0 auto;">
+      <i class="bi bi-cart-x" style="font-size: 3.5rem; color: var(--text-subtle); margin-bottom: 1rem; display: block;"></i>
+      <h2 style="font-family: var(--font-heading); margin-bottom: 0.5rem;">Your Cart is Empty</h2>
+      <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Looks like you haven't added any futuristic gear yet.</p>
+      <a href="{% url 'product_list' %}" class="btn btn-primary">Start Shopping</a>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

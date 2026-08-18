@@ -1,0 +1,97 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}CyberStore - Premium Next-Gen E-Commerce{% endblock %}</title>
+  <meta name="description" content="Discover futuristic technology, audio gear, smart wearables, and premium accessories at CyberStore.">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <!-- Feather Icons or Lucide SVG placeholders -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body>
+
+  <!-- Sticky Glass Navbar -->
+  <header class="navbar">
+    <div class="container nav-container">
+      <a href="{% url 'product_list' %}" class="brand-logo">
+        <div class="brand-icon">
+          <i class="bi bi-cpu-fill" style="color: #fff; font-size: 1.2rem;"></i>
+        </div>
+        Cyber<span>Store</span>
+      </a>
+
+      <!-- Search Form -->
+      <form action="{% url 'product_list' %}" method="GET" class="search-form">
+        <i class="bi bi-search search-icon"></i>
+        <input type="text" name="q" value="{{ query|default:'' }}" class="search-input" placeholder="Search headphones, smartwatches, laptops...">
+        {% if selected_category %}
+          <input type="hidden" name="category" value="{{ selected_category.slug }}">
+        {% endif %}
+      </form>
+
+      <!-- Nav Actions -->
+      <div class="nav-actions">
+        <a href="{% url 'cart_detail' %}" class="cart-btn" id="cart-nav-btn">
+          <i class="bi bi-bag-check-fill" style="font-size: 1.1rem; color: var(--accent-cyan);"></i>
+          <span>Cart</span>
+          <span class="cart-badge">{{ cart_count|default:0 }}</span>
+        </a>
+
+        {% if user.is_authenticated %}
+          <div class="user-menu">
+            <a href="{% url 'order_history' %}" class="user-badge btn-secondary">
+              <div class="avatar">{{ user.username|slice:":1"|upper }}</div>
+              <span>{{ user.username }}</span>
+            </a>
+            <a href="{% url 'logout' %}" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.82rem;">Logout</a>
+          </div>
+        {% else %}
+          <div style="display: flex; gap: 0.5rem;">
+            <a href="{% url 'login' %}" class="btn btn-secondary">Login</a>
+            <a href="{% url 'register' %}" class="btn btn-primary">Register</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  <!-- Django Messages Alert Overlay -->
+  {% if messages %}
+    <div class="container" style="margin-top: 1rem;">
+      {% for message in messages %}
+        <div class="glass" style="padding: 0.85rem 1.25rem; border-radius: var(--radius-md); border-left: 4px solid var(--primary); margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: space-between;">
+          <span>{{ message }}</span>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Main View Content -->
+  <main class="main-content">
+    {% block content %}
+    {% endblock %}
+  </main>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-content">
+      <div>
+        <div class="brand-logo" style="font-size: 1.2rem; margin-bottom: 0.5rem;">
+          Cyber<span>Store</span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-subtle);">Powered by Django & Modern Vanilla Web Stack. Built for speed and visual elegance.</p>
+      </div>
+      <div>
+        <p>&copy; 2026 CyberStore Inc. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>

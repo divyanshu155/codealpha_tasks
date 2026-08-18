@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+
+  <!-- Hero Section -->
+  <section class="hero glass">
+    <div class="hero-glow"></div>
+    <div>
+      <div class="hero-badge">
+        <i class="bi bi-stars"></i> Next-Gen Tech Collection 2026
+      </div>
+      <h1 class="hero-title">
+        Elevate Your Digital <span>Experience</span>
+      </h1>
+      <p class="hero-description">
+        Explore studio-grade acoustics, ultra-performance workstations, and smart wearables designed for peak productivity and immersive entertainment.
+      </p>
+      <div class="hero-actions">
+        <a href="#catalog" class="btn btn-primary">
+          <i class="bi bi-grid-fill"></i> Explore Catalog
+        </a>
+        <a href="#featured" class="btn btn-secondary">
+          <i class="bi bi-lightning-charge-fill" style="color: var(--accent-cyan);"></i> Featured Items
+        </a>
+      </div>
+    </div>
+    <div class="hero-image-wrap">
+      <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80" alt="Apex Pro Headphones" class="hero-img">
+    </div>
+  </section>
+
+  <!-- Category Filter Bar -->
+  <div class="filter-section" id="catalog">
+    <div class="category-bar">
+      <a href="{% url 'product_list' %}" class="cat-pill {% if not selected_category %}active{% endif %}">
+        <i class="bi bi-grid"></i> All Products
+      </a>
+      {% for cat in categories %}
+        <a href="{% url 'product_list' %}?category={{ cat.slug }}{% if query %}&q={{ query }}{% endif %}" 
+           class="cat-pill {% if selected_category.slug == cat.slug %}active{% endif %}">
+          <i class="bi bi-{{ cat.icon }}"></i> {{ cat.name }}
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Toolbar Bar -->
+  <div class="toolbar glass">
+    <div class="results-count">
+      Showing <span>{{ products.count }}</span> items {% if selected_category %}in <strong>{{ selected_category.name }}</strong>{% endif %} {% if query %}matching "<strong>{{ query }}</strong>"{% endif %}
+    </div>
+
+    <form method="GET" action="{% url 'product_list' %}" id="sort-form">
+      {% if selected_category %}<input type="hidden" name="category" value="{{ selected_category.slug }}">{% endif %}
+      {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+      <select name="sort" class="sort-select" onchange="document.getElementById('sort-form').submit();">
+        <option value="" {% if not sort %}selected{% endif %}>Sort by: Newest</option>
+        <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+        <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+        <option value="rating" {% if sort == 'rating' %}selected{% endif %}>Highest Rated</option>
+      </select>
+    </form>
+  </div>
+
+  <!-- Product Catalog Grid -->
+  {% if products %}
+    <div class="product-grid">
+      {% for product in products %}
+        <div class="product-card glass">
+          <div class="card-img-wrap">
+            <img src="{{ product.image_url }}" alt="{{ product.name }}" class="card-img" loading="lazy">
+            {% if product.discount_percent > 0 %}
+              <span class="discount-badge">-{{ product.discount_percent }}% OFF</span>
+            {% endif %}
+            <a href="{% url 'product_detail' product.slug %}" class="quick-view-btn" title="View details">
+              <i class="bi bi-eye"></i>
+            </a>
+          </div>
+
+          <div class="card-body">
+            <span class="card-category">{{ product.category.name }}</span>
+            <h3 class="card-title">
+              <a href="{% url 'product_detail' product.slug %}">{{ product.name }}</a>
+            </h3>
+
+            <div class="card-rating">
+              <div class="stars">
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-half"></i>
+              </div>
+              <span>{{ product.rating }} ({{ product.num_reviews }})</span>
+            </div>
+
+            <div class="card-footer">
+              <div class="price-box">
+                <span class="current-price">${{ product.price }}</span>
+                {% if product.original_price %}
+                  <span class="original-price">${{ product.original_price }}</span>
+                {% endif %}
+              </div>
+
+              <form action="{% url 'cart_add' product.id %}" method="POST" class="ajax-add-cart">
+                {% csrf_token %}
+                <input type="hidden" name="quantity" value="1">
+                <button type="submit" class="btn btn-primary add-cart-btn">
+                  <i class="bi bi-cart-plus"></i> Add
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="glass" style="text-align: center; padding: 4rem 2rem; border-radius: var(--radius-lg);">
+      <i class="bi bi-search" style="font-size: 3rem; color: var(--text-subtle); margin-bottom: 1rem; display: block;"></i>
+      <h3>No products found</h3>
+      <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Try adjusting your search keywords or filter options.</p>
+      <a href="{% url 'product_list' %}" class="btn btn-primary">Reset Filters</a>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

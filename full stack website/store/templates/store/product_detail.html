@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} - CyberStore{% endblock %}
+
+{% block content %}
+<div class="container">
+  
+  <!-- Breadcrumb -->
+  <div style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+    <a href="{% url 'product_list' %}" style="color: var(--text-subtle);">Catalog</a>
+    <span style="margin: 0 0.4rem;">/</span>
+    <a href="{% url 'product_list' %}?category={{ product.category.slug }}" style="color: var(--text-subtle);">{{ product.category.name }}</a>
+    <span style="margin: 0 0.4rem;">/</span>
+    <span style="color: var(--text-main); font-weight: 500;">{{ product.name }}</span>
+  </div>
+
+  <div class="detail-grid">
+    <!-- Image Gallery -->
+    <div class="detail-gallery glass">
+      <img src="{{ product.image_url }}" alt="{{ product.name }}" class="detail-img">
+    </div>
+
+    <!-- Product Info -->
+    <div class="detail-info">
+      <span class="card-category" style="font-size: 0.9rem;">{{ product.category.name }}</span>
+      <h1 class="detail-title">{{ product.name }}</h1>
+
+      <div class="card-rating" style="font-size: 1rem; margin-bottom: 1.25rem;">
+        <div class="stars">
+          <i class="bi bi-star-fill"></i>
+          <i class="bi bi-star-fill"></i>
+          <i class="bi bi-star-fill"></i>
+          <i class="bi bi-star-fill"></i>
+          <i class="bi bi-star-half"></i>
+        </div>
+        <span style="color: var(--text-main); font-weight: 600;">{{ product.rating }}</span>
+        <span>({{ product.num_reviews }} verified reviews)</span>
+      </div>
+
+      <div class="price-box" style="margin-bottom: 1.5rem;">
+        <div style="display: flex; align-items: baseline; gap: 0.8rem;">
+          <span class="current-price" style="font-size: 2.2rem; color: var(--accent-cyan);">${{ product.price }}</span>
+          {% if product.original_price %}
+            <span class="original-price" style="font-size: 1.2rem;">${{ product.original_price }}</span>
+            <span class="discount-badge" style="position: static;">Save {{ product.discount_percent }}%</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <p class="detail-desc">{{ product.description }}</p>
+
+      <div class="detail-meta">
+        <div class="meta-item">
+          <span class="meta-label">Stock Status</span>
+          <span class="meta-val" style="color: {% if product.stock > 0 %}var(--accent-emerald){% else %}#ef4444{% endif %};">
+            {% if product.stock > 0 %}<i class="bi bi-check-circle-fill"></i> In Stock ({{ product.stock }} available){% else %}Out of Stock{% endif %}
+          </span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Delivery</span>
+          <span class="meta-val"><i class="bi bi-truck"></i> Free Shipping ($50+)</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Warranty</span>
+          <span class="meta-val"><i class="bi bi-shield-check"></i> 2-Year Full Coverage</span>
+        </div>
+      </div>
+
+      <form action="{% url 'cart_add' product.id %}" method="POST" class="ajax-add-cart" style="display: flex; gap: 1rem; align-items: center;">
+        {% csrf_token %}
+        <div class="qty-picker">
+          <button type="button" class="qty-btn" onclick="let input=this.nextElementSibling; if(parseInt(input.value)>1) input.value=parseInt(input.value)-1;">-</button>
+          <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" class="qty-input">
+          <button type="button" class="qty-btn" onclick="let input=this.previousElementSibling; input.value=parseInt(input.value)+1;">+</button>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="flex: 1; padding: 0.85rem 1.5rem; font-size: 1rem;">
+          <i class="bi bi-bag-plus-fill"></i> Add to Shopping Cart
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Related Products Section -->
+  {% if related_products %}
+    <div style="margin-top: 4rem;">
+      <h2 style="font-family: var(--font-heading); font-size: 1.5rem; margin-bottom: 1.5rem;">Related Products</h2>
+      <div class="product-grid">
+        {% for prod in related_products %}
+          <div class="product-card glass">
+            <div class="card-img-wrap">
+              <img src="{{ prod.image_url }}" alt="{{ prod.name }}" class="card-img">
+              <a href="{% url 'product_detail' prod.slug %}" class="quick-view-btn"><i class="bi bi-eye"></i></a>
+            </div>
+            <div class="card-body">
+              <span class="card-category">{{ prod.category.name }}</span>
+              <h3 class="card-title"><a href="{% url 'product_detail' prod.slug %}">{{ prod.name }}</a></h3>
+              <div class="card-footer">
+                <span class="current-price">${{ prod.price }}</span>
+                <a href="{% url 'product_detail' prod.slug %}" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">View</a>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}
